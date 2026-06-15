@@ -1,343 +1,1377 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> দারুণ অনলাইন শপ </title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root { --primary: #c026d3; --bg: #f5f6fa; --text: #333; --white: #ffffff; }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 80px; overflow-x: hidden; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Hamster CEO</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+:root{
+  --gold:#f59e0b;--gold2:#fbbf24;--gold3:#fde68a;
+  --bg:#0a0b0f;--surf:#13141a;--surf2:#1a1b24;--border:#22253a;
+  --text:#e8eaf0;--sub:#6b7280;--green:#22c55e;--red:#ef4444;
+}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overscroll-behavior:none;
+  overflow-x:hidden;
+}
+/* Loading */
+#ls{
+  position:fixed;inset:0;z-index:999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+.ls-ham{font-size:72px;animation:bounce 1s infinite alternate}
+@keyframes bounce{to{transform:translateY(-18px)}}
+.ls-bar{width:160px;height:5px;background:#1e2030;border-radius:3px;overflow:hidden}
+.ls-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:fill 2s ease forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+.ls-txt{font-size:12px;color:var(--sub);letter-spacing:.1em}
 
-    /* --- Header & Search --- */
-    header { background: var(--white); padding: 10px 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .logo { font-size: 20px; font-weight: 800; color: var(--primary); }
-    .cart-icon { position: relative; font-size: 22px; cursor: pointer; }
-    .cart-count { position: absolute; top: -8px; right: -10px; background: red; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 50%; }
-    
-    .search-box { display: flex; background: #f1f1f1; border-radius: 25px; padding: 5px 15px; }
-    .search-box input { border: none; background: none; outline: none; width: 100%; padding: 8px; font-size: 14px; }
-    .search-box button { border: none; background: var(--primary); color: #fff; padding: 5px 15px; border-radius: 20px; margin-left: 5px; cursor: pointer; }
+/* App */
+#app{display:none;max-width:430px;margin:0 auto;padding-bottom:72px}
 
-    /* --- Banner Slider --- */
-    .slider-box { padding: 10px 15px; }
-    .slider { width: 100%; height: 170px; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .b-img { width: 100%; height: 100%; object-fit: cover; position: absolute; display: none; }
-    .b-img.active { display: block; animation: fade 0.6s ease-in; }
-    @keyframes fade { from {opacity: 0.5} to {opacity: 1} }
+/* Header */
+.hdr{
+  padding:14px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+  position:sticky;top:0;z-index:40;
+  border-bottom:1px solid var(--border);
+}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--surf2);
+  border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;overflow:hidden;flex-shrink:0;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.uname{font-size:14px;font-weight:700;line-height:1.2}
+.ulg{font-size:11px;color:var(--gold);line-height:1.3}
+.hdr-right{text-align:right}
+.pph-lbl{font-size:10px;color:var(--sub)}
+.pph-val{font-size:13px;font-weight:700;color:var(--green)}
 
-    /* --- Categories (Admin Linked) --- */
-    .cat-section { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; }
-    .cat-item { background: var(--white); padding: 8px 18px; border-radius: 20px; font-size: 13px; white-space: nowrap; border: 1px solid #eee; cursor: pointer; transition: 0.3s; }
-    .cat-item.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+/* Balance */
+.balance{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 0 10px;
+}
+.balance .coin-ico{font-size:34px}
+.balance .amount{font-size:42px;font-weight:900;letter-spacing:-.03em;color:#fff}
 
-    /* --- Flash Sale --- */
-    .flash-sale { background: var(--white); margin: 10px 0; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-    .flash-title { color: var(--primary); font-weight: bold; }
-    .timer { font-size: 13px; font-weight: bold; }
-    .timer span { background: #333; color: #fff; padding: 2px 4px; border-radius: 4px; margin: 0 2px; }
+/* Daily row */
+.daily-row{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+  padding:0 14px 12px;
+}
+.daily-btn{
+  background:var(--surf);border:1px solid var(--border);
+  border-radius:14px;padding:10px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;transition:transform .1s,border-color .15s;
+  font-family:inherit;color:var(--text);
+}
+.daily-btn:active{transform:scale(.95)}
+.daily-btn .d-ico{font-size:22px}
+.daily-btn .d-lbl{font-size:10px;color:var(--sub);text-align:center;line-height:1.3}
+.daily-btn .d-badge{font-size:10px;font-weight:700;color:var(--gold)}
 
-    /* --- Product Card UI --- */
-    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 10px; }
-    .card { background: var(--white); border-radius: 10px; overflow: hidden; border: 1px solid #eee; position: relative; display: flex; flex-direction: column; transition: 0.3s; }
-    .discount { position: absolute; top: 10px; left: 0; background: #ff4757; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 0 10px 10px 0; font-weight: bold; z-index: 2; }
-    .card img { width: 100%; height: 150px; object-fit: cover; }
-    .card-info { padding: 10px; text-align: center; flex: 1; }
-    .p-name { font-size: 14px; height: 35px; overflow: hidden; color: #555; margin-bottom: 8px; }
-    .price-row { margin-bottom: 10px; }
-    .new-price { color: #ff4757; font-weight: bold; font-size: 18px; }
-    .old-price { text-decoration: line-through; color: #aaa; font-size: 12px; margin-left: 5px; }
-    
-    .qty-ctrl { display: flex; align-items: center; justify-content: center; border: 1px solid #eee; border-radius: 5px; margin-bottom: 10px; }
-    .qty-btn { width: 30px; height: 30px; border: none; background: #f8f9fa; cursor: pointer; font-weight: bold; }
-    .qty-num { flex: 1; font-size: 14px; font-weight: bold; }
+/* TAB PAGES */
+.page{display:none;padding:14px}
+.page.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-    .add-btn { width: 100%; background: #f8f9fa; border: 1px solid #ddd; padding: 8px; border-radius: 5px; font-size: 13px; font-weight: bold; cursor: pointer; }
-    .add-btn:active { background: var(--primary); color: #fff; }
+/* Home / Tap */
+.ham-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 16px}
+.ham-btn{
+  width:220px;height:220px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:90px;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#fde68a,#f59e0b 55%,#b45309 100%);
+  box-shadow:0 0 0 0 rgba(245,158,11,.4);
+  animation:pulseGlow 2.5s ease-in-out infinite;
+  position:relative;overflow:visible;
+  transition:transform .08s;touch-action:manipulation;
+  user-select:none;
+}
+.ham-btn:active{transform:scale(.92)}
+@keyframes pulseGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.4),0 12px 40px rgba(245,158,11,.25)}
+  50%{box-shadow:0 0 0 20px rgba(245,158,11,0),0 12px 40px rgba(245,158,11,.35)}
+}
+#float-layer{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:900}
+.fp{
+  position:absolute;font-size:26px;font-weight:900;color:var(--gold2);
+  text-shadow:0 2px 8px rgba(0,0,0,.5);
+  animation:floatUp .75s ease forwards;
+  pointer-events:none;
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) scale(.7);opacity:0}
+  20%{transform:translateY(-10px) scale(1.2);opacity:1}
+  100%{transform:translateY(-80px) scale(1);opacity:0}
+}
 
-    /* --- Checkout Drawer --- */
-    .drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #fff; z-index: 2000; border-radius: 20px 20px 0 0; transition: 0.4s; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); overflow-y: auto; }
-    .drawer.active { bottom: 0; }
-    .close-drawer { float: right; font-size: 24px; color: #999; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 12px; color: #ff4757; margin-bottom: 5px; font-weight: bold; }
-    .form-group input { width: 100%; padding: 12px; border: 1px solid #ff4757; border-radius: 10px; outline: none; }
-    
-    .coupon-section { display: flex; gap: 5px; margin: 15px 0; }
-    .coupon-section input { flex: 1; padding: 10px; border: 1px dashed var(--primary); border-radius: 8px; outline: none; }
-    .coupon-section button { background: var(--primary); color: #fff; border: none; padding: 0 15px; border-radius: 8px; }
+/* Energy */
+.energy-wrap{padding:0 14px}
+.e-row{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:5px}
+.e-bar{height:12px;background:var(--surf2);border-radius:6px;overflow:hidden}
+.e-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold3));transition:width .3s ease;border-radius:6px}
+.boost-row{display:flex;gap:8px;margin-top:10px}
+.boost-btn{
+  flex:1;background:var(--surf);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  color:var(--text);font-family:inherit;
+  transition:transform .1s,border-color .15s;
+}
+.boost-btn:active{transform:scale(.96)}
+.boost-btn:disabled{opacity:.35;cursor:not-allowed}
+.boost-btn i{color:var(--gold)}
 
-    /* --- Bottom Nav --- */
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #eee; z-index: 1000; }
-    .nav-link { text-align: center; color: #999; font-size: 12px; text-decoration: none; cursor: pointer; }
-    .nav-link.active { color: var(--primary); }
-    .nav-link i { font-size: 20px; display: block; margin-bottom: 3px; }
+/* Offline earnings popup */
+.offline-popup{
+  background:linear-gradient(135deg,var(--surf),#1e2038);
+  border:1px solid var(--gold);border-radius:16px;padding:18px;margin:0 14px 14px;
+  display:flex;align-items:center;gap:12px;
+  animation:fadeUp .3s ease;
+}
+.offline-popup .op-ico{font-size:32px}
+.offline-popup .op-txt{flex:1;font-size:12px;color:var(--sub);line-height:1.5}
+.offline-popup .op-amt{font-size:16px;font-weight:800;color:var(--gold)}
+.offline-popup .op-close{
+  background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;
+}
 
-    /* Toast */
-    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 25px; font-size: 13px; display: none; z-index: 3000; }
+/* Upgrades */
+.cat-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-pill{
+  padding:7px 14px;border-radius:20px;font-size:11px;font-weight:600;
+  white-space:nowrap;cursor:pointer;border:1px solid var(--border);
+  background:var(--surf);color:var(--sub);
+  transition:all .15s;font-family:inherit;
+}
+.cat-pill.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.up-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:14px;
+  padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  transition:border-color .15s;
+}
+.up-card:hover{border-color:rgba(245,158,11,.3)}
+.up-ico{font-size:32px;width:42px;text-align:center;flex-shrink:0}
+.up-info{flex:1;min-width:0}
+.up-name{font-size:13px;font-weight:600;line-height:1.3}
+.up-meta{font-size:10px;color:var(--sub);margin-top:2px}
+.up-effect{font-size:10px;color:var(--green);margin-top:1px}
+.buy-btn{
+  background:var(--gold);color:#000;border:none;border-radius:10px;
+  padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;font-family:inherit;
+  transition:transform .1s,opacity .15s;
+}
+.buy-btn:active{transform:scale(.95)}
+.buy-btn:disabled{opacity:.3;cursor:not-allowed;background:var(--sub)}
 
-  </style>
+/* Section title */
+.sec-title{font-size:16px;font-weight:700;margin-bottom:12px}
+
+/* Tasks */
+.task-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:14px;
+  padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.task-ico{font-size:28px;width:40px;text-align:center;flex-shrink:0}
+.task-info{flex:1;min-width:0}
+.task-title{font-size:13px;font-weight:500;line-height:1.3}
+.task-reward{font-size:11px;color:var(--gold);margin-top:2px;font-weight:600}
+.go-btn{
+  background:var(--gold);color:#000;border:none;border-radius:10px;
+  padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;
+  flex-shrink:0;font-family:inherit;transition:transform .1s,opacity .15s;
+}
+.go-btn:active{transform:scale(.95)}
+.go-btn.done{background:var(--surf2);color:var(--sub);cursor:not-allowed}
+
+/* Leaderboard */
+.lb-row{
+  background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:7px;
+}
+.lb-row.me{border-color:var(--gold);background:rgba(245,158,11,.05)}
+.lb-rank{width:24px;font-size:13px;font-weight:700;text-align:center;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-sub{font-size:10px;color:var(--sub);margin-top:1px}
+.lb-coins{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
+
+/* Frens */
+.ref-box{
+  background:var(--surf);border:1px solid var(--border);border-radius:16px;
+  padding:18px;margin-bottom:14px;text-align:center;
+}
+.ref-box .r-lbl{font-size:12px;color:var(--sub);margin-bottom:6px}
+.ref-box .r-amt{font-size:28px;font-weight:900;color:var(--gold);margin-bottom:14px}
+.ref-share{
+  width:100%;background:var(--gold);color:#000;border:none;
+  border-radius:12px;padding:13px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;margin-bottom:8px;transition:opacity .15s;
+}
+.ref-share:active{opacity:.8}
+.ref-copy{
+  width:100%;background:var(--surf2);color:var(--text);
+  border:1px solid var(--border);border-radius:12px;padding:10px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;
+}
+.ref-copy:active{opacity:.7}
+.fren-row{
+  background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:10px 12px;display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:7px;
+}
+.fren-name{font-size:13px;font-weight:600}
+.fren-coins{font-size:12px;color:var(--gold);font-weight:700}
+
+/* Achievements */
+.ach-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:16px;
+  padding:14px;display:flex;gap:12px;margin-bottom:10px;
+  transition:border-color .15s;
+}
+.ach-card.done{border-color:var(--green)}
+.ach-card.locked{opacity:.6}
+.ach-ico{font-size:38px;flex-shrink:0;width:44px;text-align:center}
+.ach-body{flex:1;min-width:0}
+.ach-name{font-size:14px;font-weight:700}
+.ach-desc{font-size:11px;color:var(--sub);margin-top:2px}
+.ach-prog{height:8px;background:var(--surf2);border-radius:4px;overflow:hidden;margin-top:8px}
+.ach-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .3s}
+.ach-pct{font-size:10px;color:var(--sub);text-align:right;margin-top:3px}
+.ach-right{text-align:right;flex-shrink:0}
+.ach-reward{font-size:13px;font-weight:700;color:var(--green)}
+.ach-done-ico{font-size:22px;margin-top:4px}
+
+/* Bottom nav */
+#bnav{
+  position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;
+  background:var(--surf);border-top:1px solid var(--border);
+  display:flex;z-index:50;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 4px 8px;font-size:9px;color:var(--sub);
+  border:none;background:none;cursor:pointer;transition:color .15s;
+  font-family:inherit;
+}
+.nav-btn i{font-size:18px}
+.nav-btn.active{color:var(--gold)}
+
+/* Modal */
+.modal-bg{
+  display:none;position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center;
+  padding:0;
+}
+.modal-bg.open{display:flex}
+.modal-box{
+  background:var(--surf);border:1px solid var(--border);
+  border-top-left-radius:22px;border-top-right-radius:22px;
+  padding:22px 20px 32px;width:100%;max-height:88vh;
+  overflow-y:auto;animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:var(--surf2);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-body{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:18px}
+.modal-ok{
+  width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;
+  padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:opacity .15s;
+}
+.modal-ok:active{opacity:.8}
+.modal-ok2{
+  width:100%;background:var(--surf2);color:var(--text);border:1px solid var(--border);
+  border-radius:12px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:inherit;margin-top:8px;transition:opacity .15s;
+}
+.modal-ok2:active{opacity:.7}
+
+/* Check-in grid */
+.ci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.ci-item{
+  background:var(--surf2);border:1px solid var(--border);border-radius:10px;
+  padding:8px 4px;text-align:center;
+}
+.ci-item.active{border-color:var(--gold);background:rgba(245,158,11,.08)}
+.ci-item.claimed{border-color:var(--green);background:rgba(34,197,94,.06)}
+.ci-day{font-size:9px;color:var(--sub);margin-bottom:3px}
+.ci-ico{font-size:18px;margin-bottom:2px}
+.ci-amt{font-size:9px;font-weight:700;color:var(--gold)}
+
+/* Cipher input */
+.cipher-input{
+  width:100%;background:var(--bg);border:2px solid var(--border);
+  border-radius:12px;color:var(--text);padding:13px;
+  font-family:inherit;font-size:16px;letter-spacing:.15em;
+  text-align:center;text-transform:uppercase;outline:none;
+  transition:border-color .15s;margin-bottom:6px;
+}
+.cipher-input:focus{border-color:var(--gold)}
+.cipher-err{font-size:12px;color:var(--red);text-align:center;margin-bottom:10px;display:none}
+.cipher-hint{
+  font-size:12px;color:var(--sub);text-align:center;
+  background:var(--surf2);border-radius:10px;padding:10px;margin-bottom:14px;
+}
+
+/* Combo cards */
+.combo-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.combo-item{
+  background:var(--surf2);border:1px solid var(--border);border-radius:12px;
+  padding:12px;display:flex;align-items:center;gap:10px;
+}
+.combo-item.done{border-color:var(--green);background:rgba(34,197,94,.05)}
+.combo-ico{font-size:24px;width:32px;text-align:center}
+.combo-name{flex:1;font-size:13px;font-weight:500}
+.combo-check{font-size:20px}
+
+/* Toast */
+#toasts{position:fixed;bottom:80px;left:0;right:0;max-width:430px;margin:0 auto;padding:0 14px;z-index:700;display:flex;flex-direction:column;gap:6px;align-items:center}
+.toast{
+  background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+  animation:toastIn .2s ease;min-width:200px;
+}
+@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+
+/* Empty state */
+.empty{text-align:center;padding:40px 20px;color:var(--sub)}
+.empty .e-ico{font-size:40px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* Utility */
+.flex-jb{display:flex;justify-content:space-between;align-items:center}
+.shimmer{
+  background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);
+  background-size:300% 100%;animation:shim 1.4s infinite;border-radius:12px;height:60px;margin-bottom:8px;
+}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
 </head>
 <body>
 
-  <header>
-    <div class="header-top">
-      <div class="logo">দারুণ অনলাইন শপ</div>
-      <div class="cart-icon" onclick="toggleDrawer()">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span class="cart-count" id="cartCount">0</span>
+<!-- LOADING -->
+<div id="ls">
+  <div class="ls-ham">🐹</div>
+  <div class="ls-bar"><div class="ls-fill"></div></div>
+  <p class="ls-txt">লোড হচ্ছে...</p>
+</div>
+
+<!-- FLOAT LAYER -->
+<div id="float-layer"></div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="avatar" id="avatar">🐹</div>
+      <div>
+        <div class="uname" id="uname">Player</div>
+        <div class="ulg" id="ulg">🥉 Bronze</div>
       </div>
     </div>
-    <div class="search-box">
-      <input type="text" id="searchInp" placeholder="আপনার পছন্দের পণ্য খুঁজুন..." onkeyup="search()">
-      <button><i class="fa-solid fa-magnifying-glass"></i></button>
-    </div>
-  </header>
-
-  <div class="slider-box">
-    <div class="slider" id="bannerArea"></div>
-  </div>
-
-  <div class="cat-section" id="catArea">
-    <div class="cat-item active" onclick="filterCat('All', this)">সবগুলো</div>
-  </div>
-
-  <div class="flash-sale">
-    <div class="flash-title">ফ্ল্যাশসেল</div>
-    <div class="timer">
-      04 : 21 : 11 : <span id="sec">54</span>
+    <div class="hdr-right">
+      <div class="pph-lbl">প্রোফিট/ঘণ্টা</div>
+      <div class="pph-val">+<span id="pph">0</span> 🪙</div>
     </div>
   </div>
 
-  <div class="product-grid" id="productGrid"></div>
-
-  <div class="drawer" id="orderDrawer">
-    <i class="fa-solid fa-circle-xmark close-drawer" onclick="toggleDrawer()"></i>
-    <h3 style="margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 10px;">শপিং ঠিকানা</h3>
-    
-    <div id="cartItemsList" style="margin-bottom: 15px; font-size: 13px; color: #555;"></div>
-
-    <div class="form-group">
-      <label>ফোন নম্বর</label>
-      <input type="text" id="oPhone" placeholder="আপনার ১০ ডিজিটের নম্বর">
-    </div>
-    <div class="form-group">
-      <label>আপনার নাম</label>
-      <input type="text" id="oName" placeholder="পুরো নাম লিখুন">
-    </div>
-    <div class="form-group">
-      <label>ঠিকানা</label>
-      <input type="text" id="oAddress" placeholder="গ্রাম/রোড, থানা, জেলা">
-    </div>
-
-    <div class="coupon-section">
-      <input type="text" id="couponCode" placeholder="কুপন কোড (যদি থাকে)">
-      <button onclick="applyCoupon()">Apply</button>
-    </div>
-
-    <div style="font-weight: bold; font-size: 18px; margin: 15px 0;">মোট টাকা: ৳<span id="finalPrice">0</span></div>
-    
-    <button onclick="confirmOrder()" style="width: 100%; background: var(--primary); color: #fff; padding: 15px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px;">অর্ডার কনফার্ম করুন</button>
+  <!-- Balance -->
+  <div class="balance">
+    <span class="coin-ico">🪙</span>
+    <span class="amount" id="coins">0</span>
   </div>
 
-  <div id="toast">পণ্য কার্টে যোগ হয়েছে!</div>
-
-  <div class="bottom-nav">
-    <div class="nav-link active"><i class="fa-solid fa-house"></i>হোম</div>
-    <div class="nav-link"><i class="fa-solid fa-layer-group"></i>ক্যাটাগরি</div>
-    <div class="nav-link" onclick="toggleDrawer()"><i class="fa-solid fa-bag-shopping"></i>কার্ট</div>
-    <div class="nav-link"><i class="fa-solid fa-user"></i>প্রোফাইল</div>
+  <!-- Daily row -->
+  <div class="daily-row">
+    <button class="daily-btn" onclick="openCheckIn()">
+      <span class="d-ico">📅</span>
+      <span class="d-lbl">ডেইলি চেক-ইন</span>
+      <span class="d-badge" id="ci-badge">●</span>
+    </button>
+    <button class="daily-btn" onclick="openCombo()">
+      <span class="d-ico">🃏</span>
+      <span class="d-lbl">ডেইলি কম্বো</span>
+      <span class="d-badge" id="combo-badge">0/3</span>
+    </button>
+    <button class="daily-btn" onclick="openCipher()">
+      <span class="d-ico">🔐</span>
+      <span class="d-lbl">ডেইলি সাইফার</span>
+      <span class="d-badge" id="cipher-badge">●</span>
+    </button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- PAGE 0: HOME -->
+  <div class="page active" id="p0">
+    <div id="offline-banner"></div>
+    <div class="ham-wrap">
+      <div class="ham-btn" id="ham-btn">🐹</div>
+    </div>
+    <div class="energy-wrap">
+      <div class="e-row">
+        <span><i class="fa-solid fa-bolt" style="color:var(--gold)"></i> এনার্জি</span>
+        <span id="e-text">1000 / 1000</span>
+      </div>
+      <div class="e-bar"><div class="e-fill" id="e-fill" style="width:100%"></div></div>
+      <div class="boost-row">
+        <button class="boost-btn" id="boost-btn" onclick="useBoost()">
+          <i class="fa-solid fa-bolt"></i>
+          ফুল এনার্জি <span id="boost-left" style="color:var(--sub);font-size:11px">(3/3)</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBM-DWuwF3f_JAJh8VGc41MzcOLKDRIjWc",
-      databaseURL: "https://ai-app-called-default-rtdb.firebaseio.com",
-      projectId: "ai-app-called",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  <!-- PAGE 1: MINE -->
+  <div class="page" id="p1">
+    <p class="sec-title">মাইনিং আপগ্রেড</p>
+    <div class="cat-scroll" id="cat-scroll"></div>
+    <div id="upgrades-list"></div>
+  </div>
 
-    let allProducts = [], cart = [], coupons = [];
-    let appliedDiscount = 0;
+  <!-- PAGE 2: EARN -->
+  <div class="page" id="p2">
+    <p class="sec-title">আর্ন / টাস্ক</p>
+    <div id="tasks-list"></div>
+  </div>
 
-    function loadData() {
-      // 1. Fetch Banners
-      db.ref('banners').on('value', s => {
-        const area = document.getElementById('bannerArea');
-        area.innerHTML = '';
-        s.forEach(c => { area.innerHTML += `<img src="${c.val().image}" class="b-img">`; });
-        startSlider();
-      });
+  <!-- PAGE 3: RANK -->
+  <div class="page" id="p3">
+    <p class="sec-title">লিডারবোর্ড</p>
+    <div id="lb-list"></div>
+  </div>
 
-      // 2. Fetch Products & Categories
-      db.ref('products').on('value', s => {
-        allProducts = [];
-        const uniqueCats = new Set();
-        s.forEach(c => {
-          const p = c.val(); p.id = c.key;
-          allProducts.push(p);
-          if(p.category) uniqueCats.add(p.category);
-        });
-        
-        // Render Categories
-        const catArea = document.getElementById('catArea');
-        catArea.innerHTML = '<div class="cat-item active" onclick="filterCat(\'All\', this)">সবগুলো</div>';
-        uniqueCats.forEach(cat => {
-          catArea.innerHTML += `<div class="cat-item" onclick="filterCat('${cat}', this)">${cat}</div>`;
-        });
+  <!-- PAGE 4: FRENS -->
+  <div class="page" id="p4">
+    <p class="sec-title">ফ্রেন্ডস</p>
+    <div class="ref-box">
+      <p class="r-lbl">প্রতিটি ফ্রেন্ড ইনভাইটে পাও</p>
+      <p class="r-amt" id="ref-reward-lbl">+10,000 🪙</p>
+      <button class="ref-share" onclick="shareRef()"><i class="fa-solid fa-paper-plane"></i> ইনভাইট লিংক শেয়ার করো</button>
+      <button class="ref-copy" onclick="copyRef()"><i class="fa-solid fa-copy"></i> লিংক কপি করো</button>
+    </div>
+    <div class="flex-jb" style="margin-bottom:10px">
+      <span style="font-size:13px;font-weight:600">তোমার ফ্রেন্ডস (<span id="ref-count">0</span>)</span>
+    </div>
+    <div id="frens-list"></div>
+  </div>
 
-        renderProducts(allProducts);
-      });
+  <!-- PAGE 5: ACHIEVEMENTS -->
+  <div class="page" id="p5">
+    <p class="sec-title">এচিভমেন্টস</p>
+    <div id="ach-list"></div>
+  </div>
 
-      // 3. Fetch Coupons
-      db.ref('coupons').on('value', s => {
-        coupons = [];
-        s.forEach(c => { coupons.push(c.val()); });
-      });
+  <!-- Bottom Nav -->
+  <div id="bnav">
+    <button class="nav-btn active" id="nb0" onclick="showPage(0)"><i class="fa-solid fa-house"></i>হোম</button>
+    <button class="nav-btn" id="nb1" onclick="showPage(1)"><i class="fa-solid fa-gem"></i>মাইন</button>
+    <button class="nav-btn" id="nb2" onclick="showPage(2)"><i class="fa-solid fa-bullseye"></i>আর্ন</button>
+    <button class="nav-btn" id="nb3" onclick="showPage(3)"><i class="fa-solid fa-trophy"></i>র‍্যাংক</button>
+    <button class="nav-btn" id="nb4" onclick="showPage(4)"><i class="fa-solid fa-users"></i>ফ্রেন্ডস</button>
+    <button class="nav-btn" id="nb5" onclick="showPage(5)"><i class="fa-solid fa-medal"></i>অ্যাচিভ</button>
+  </div>
+</div>
 
-      startSecTimer();
+<!-- MODAL -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<script>
+// ======================================================
+// FIREBASE CONFIG
+// ======================================================
+const FB_CFG = {
+  apiKey: "AIzaSyCWNzlU0RLN05onwepfpNTadL7dxPl467Q",
+  authDomain: "my-cat-70db8.firebaseapp.com",
+  databaseURL: "https://my-cat-70db8-default-rtdb.firebaseio.com",
+  projectId: "my-cat-70db8",
+  storageBucket: "my-cat-70db8.firebasestorage.app",
+  messagingSenderId: "1019144594855",
+  appId: "1:1019144594855:web:81942b086bb56d32c20282"
+};
+
+// ======================================================
+// BOT CONFIG — admin panel এর settings থেকে override হবে
+// ======================================================
+const BOT_USERNAME = 'ofcilmysterybox_bot'; // তোমার বট username
+
+// ======================================================
+// DEFAULT GAME CONFIG
+// ======================================================
+const DEFAULT_CFG = {
+  botUsername: BOT_USERNAME,
+  referralReward: 10000,
+  maxEnergyBase: 1000,
+  energyRegenPerTick: 3,
+  energyRegenIntervalMs: 1000,
+  fullEnergyBoostsPerDay: 3,
+  offlineEarningCapHours: 3,
+  upgrades: [
+    {id:'mkt1',name:'ফ্রিল্যান্স মার্কেটার',cat:'pr',icon:'📢',baseCost:1000,baseProfit:80,mult:1.13},
+    {id:'mkt2',name:'ইনফ্লুয়েন্সার ক্যাম্পেইন',cat:'pr',icon:'📱',baseCost:5000,baseProfit:400,mult:1.14},
+    {id:'mkt3',name:'পিআর এজেন্সি',cat:'pr',icon:'🏢',baseCost:20000,baseProfit:1300,mult:1.15},
+    {id:'ex1',name:'স্পট লিস্টিং',cat:'markets',icon:'💱',baseCost:2000,baseProfit:120,mult:1.13},
+    {id:'ex2',name:'ট্রেডিং বট',cat:'markets',icon:'🤖',baseCost:10000,baseProfit:600,mult:1.14},
+    {id:'ex3',name:'লিকুইডিটি পুল',cat:'markets',icon:'💧',baseCost:50000,baseProfit:2500,mult:1.15},
+    {id:'leg1',name:'ট্যাক্স ফ্রি জোন',cat:'legal',icon:'📜',baseCost:3000,baseProfit:150,mult:1.13},
+    {id:'leg2',name:'অফশোর লাইসেন্স',cat:'legal',icon:'🏝️',baseCost:15000,baseProfit:700,mult:1.14},
+    {id:'leg3',name:'লিগ্যাল টিম',cat:'legal',icon:'⚖️',baseCost:60000,baseProfit:3000,mult:1.15},
+    {id:'spc1',name:'এনার্জি ড্রিংক',cat:'special',icon:'🔋',baseCost:2500,baseProfit:0,mult:1.20,energyBoost:500},
+    {id:'spc2',name:'মাল্টিট্যাপ',cat:'special',icon:'👆',baseCost:4000,baseProfit:0,mult:1.25,tapBoost:1}
+  ],
+  categories: [
+    {id:'pr',name:'পিআর ও টিম',icon:'📢'},
+    {id:'markets',name:'মার্কেট',icon:'💱'},
+    {id:'legal',name:'লিগ্যাল',icon:'⚖️'},
+    {id:'special',name:'স্পেশাল',icon:'⭐'}
+  ],
+  tasks: [
+    {id:'t1',title:'আমাদের চ্যানেল জয়েন করো',reward:5000,link:'https://t.me/',icon:'📢'},
+    {id:'t2',title:'টুইটার (X) ফলো করো',reward:5000,link:'https://twitter.com/',icon:'🐦'},
+    {id:'t3',title:'কমিউনিটি গ্রুপে জয়েন করো',reward:5000,link:'https://t.me/',icon:'👥'}
+  ],
+  dailyCombo: {date:'',cards:[],reward:50000},
+  dailyCipher: {date:'',word:'',hint:'',reward:25000},
+  checkInRewards: [500,1000,1500,2500,4000,6000,10000],
+  leagues: [
+    {name:'Bronze',min:0,icon:'🥉',color:'#cd7f32'},
+    {name:'Silver',min:5000,icon:'🥈',color:'#c0c0c0'},
+    {name:'Gold',min:25000,icon:'🥇',color:'#ffd54a'},
+    {name:'Platinum',min:100000,icon:'💎',color:'#a78bfa'},
+    {name:'Diamond',min:1000000,icon:'💠',color:'#60c5fa'},
+    {name:'Master',min:10000000,icon:'👑',color:'#f472b6'},
+    {name:'Legend',min:100000000,icon:'🏆',color:'#facc15'}
+  ]
+};
+
+// ======================================================
+// GLOBAL STATE
+// ======================================================
+let db, tg, userId, CFG;
+let activeCat = 'pr';
+let currentPage = 0;
+
+let S = {
+  username:'player', firstName:'Player', photoUrl:'',
+  coins:0, energy:1000, maxEnergy:1000,
+  profitPerHour:0, tapPower:1,
+  upgrades:{}, totalTaps:0,
+  referralCount:0, referredBy:null, referrals:[],
+  dailyCombo:{date:'',upgraded:[],claimed:false},
+  dailyCipher:{date:'',claimed:false},
+  checkIn:{streak:0,lastDate:'',claimedToday:false},
+  tasksCompleted:[],
+  boostsUsedToday:0, boostDate:'',
+  banned:false, createdAt:null, lastUpdated:null
+};
+
+const ACH = [
+  {id:'a1',name:'শুরুর ট্যাপার',desc:'৫০০ বার ট্যাপ করো',reward:10000,max:500,unlocked:false,icon:'👆',type:'totalTaps'},
+  {id:'a2',name:'মিলিয়নিয়ার',desc:'১,০০০,০০০ কয়েন জমাও',reward:25000,max:1000000,unlocked:false,icon:'💰',type:'coins'},
+  {id:'a3',name:'সোশ্যাল বাটারফ্লাই',desc:'১০ জন ফ্রেন্ড ইনভাইট করো',reward:30000,max:10,unlocked:false,icon:'👥',type:'referralCount'},
+  {id:'a4',name:'প্লাটিনাম লীগ',desc:'১,০০,০০০ কয়েন কামাও',reward:50000,max:100000,unlocked:false,icon:'💎',type:'coins'},
+  {id:'a5',name:'ট্যাপ মাস্টার',desc:'৫,০০০ বার ট্যাপ করো',reward:75000,max:5000,unlocked:false,icon:'⚡',type:'totalTaps'},
+  {id:'a6',name:'প্যাসিভ কিং',desc:'১০,০০০/ঘণ্টা প্রোফিট রেট পাও',reward:100000,max:10000,unlocked:false,icon:'⏰',type:'profitPerHour'}
+];
+
+// ======================================================
+// HELPERS
+// ======================================================
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmt(n){ return Math.floor(n||0).toLocaleString('en-US'); }
+function isYesterday(d){
+  if(!d) return false;
+  const y = new Date(); y.setDate(y.getDate()-1);
+  return d === y.toISOString().slice(0,10);
+}
+function getLeague(coins){
+  let l = CFG.leagues[0];
+  for(const x of CFG.leagues){ if(coins >= x.min) l = x; }
+  return l;
+}
+function getCardLevel(id){ return S.upgrades[id]||0; }
+function getCardCost(card){
+  return Math.round(card.baseCost * Math.pow(card.mult, getCardLevel(card.id)));
+}
+function recalc(){
+  let pph=0, tap=1, maxE=CFG.maxEnergyBase||1000;
+  (CFG.upgrades||[]).forEach(c=>{
+    const lv = getCardLevel(c.id);
+    if(!lv) return;
+    if(c.baseProfit) pph += c.baseProfit * lv;
+    if(c.tapBoost) tap += c.tapBoost * lv;
+    if(c.energyBoost) maxE += c.energyBoost * lv;
+  });
+  S.profitPerHour = pph;
+  S.tapPower = tap;
+  S.maxEnergy = maxE;
+  if(S.energy > S.maxEnergy) S.energy = S.maxEnergy;
+}
+
+// ======================================================
+// MODAL
+// ======================================================
+function showModal(html){
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+// ======================================================
+// TOAST
+// ======================================================
+function toast(msg, type='success'){
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='success'?'✅':'❌'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(), 2800);
+}
+
+// ======================================================
+// RENDER: HEADER + BALANCE
+// ======================================================
+function renderHeader(){
+  document.getElementById('uname').textContent = S.firstName || S.username;
+  document.getElementById('coins').textContent = fmt(S.coins);
+  document.getElementById('pph').textContent = fmt(S.profitPerHour);
+  const lg = getLeague(S.coins);
+  const lgEl = document.getElementById('ulg');
+  lgEl.textContent = `${lg.icon} ${lg.name}`;
+  lgEl.style.color = lg.color;
+  const av = document.getElementById('avatar');
+  av.style.borderColor = lg.color;
+  if(S.photoUrl){
+    av.innerHTML = `<img src="${S.photoUrl}" onerror="this.parentNode.textContent='🐹'"/>`;
+  }
+}
+
+// ======================================================
+// RENDER: ENERGY
+// ======================================================
+function renderEnergy(){
+  const pct = (S.energy / S.maxEnergy) * 100;
+  document.getElementById('e-fill').style.width = pct + '%';
+  document.getElementById('e-text').textContent = `${Math.floor(S.energy)} / ${S.maxEnergy}`;
+  const td = today();
+  if(S.boostDate !== td){ S.boostsUsedToday = 0; S.boostDate = td; }
+  const left = Math.max(0, (CFG.fullEnergyBoostsPerDay||3) - S.boostsUsedToday);
+  document.getElementById('boost-left').textContent = `(${left}/${CFG.fullEnergyBoostsPerDay||3})`;
+  document.getElementById('boost-btn').disabled = (left <= 0 || S.energy >= S.maxEnergy);
+}
+
+function useBoost(){
+  const td = today();
+  if(S.boostDate !== td){ S.boostsUsedToday = 0; S.boostDate = td; }
+  const max = CFG.fullEnergyBoostsPerDay || 3;
+  if(S.boostsUsedToday >= max){
+    showModal(`<div class="modal-handle"></div><div class="modal-title">⚡ বুস্ট শেষ</div><div class="modal-body">আজকের ফুল-এনার্জি বুস্ট শেষ। কাল আবার পাবে।</div><button class="modal-ok" onclick="closeModal()">ঠিক আছে</button>`);
+    return;
+  }
+  S.energy = S.maxEnergy;
+  S.boostsUsedToday++;
+  renderEnergy();
+  saveUser();
+  toast('এনার্জি ফুল হয়েছে! ⚡');
+}
+
+// ======================================================
+// TAP
+// ======================================================
+document.getElementById('ham-btn').addEventListener('click', function(e){
+  if(S.energy <= 0){
+    showModal(`<div class="modal-handle"></div><div class="modal-title">⚠️ এনার্জি শেষ!</div><div class="modal-body">এনার্জি রিজেনারেট হওয়া পর্যন্ত অপেক্ষা করো, অথবা বুস্ট ব্যবহার করো।</div><button class="modal-ok" onclick="closeModal()">ঠিক আছে</button>`);
+    return;
+  }
+  const gain = S.tapPower || 1;
+  S.coins += gain;
+  S.energy = Math.max(0, S.energy - 1);
+  S.totalTaps++;
+
+  // Float number
+  const fl = document.createElement('div');
+  fl.className = 'fp';
+  fl.textContent = `+${gain}`;
+  const rect = e.currentTarget.getBoundingClientRect();
+  fl.style.left = (e.clientX - 20) + 'px';
+  fl.style.top = (e.clientY - 30) + 'px';
+  document.getElementById('float-layer').appendChild(fl);
+  setTimeout(()=>fl.remove(), 750);
+
+  renderHeader();
+  renderEnergy();
+  checkAchievements();
+});
+
+// ======================================================
+// TABS
+// ======================================================
+function showPage(n){
+  for(let i=0;i<=5;i++){
+    document.getElementById('p'+i).classList.toggle('active', i===n);
+    document.getElementById('nb'+i).classList.toggle('active', i===n);
+  }
+  currentPage = n;
+  if(n===1){ renderCats(); renderUpgrades(); }
+  if(n===2) renderTasks();
+  if(n===3) renderLeaderboard();
+  if(n===4) renderFrens();
+  if(n===5) renderAch();
+}
+
+// ======================================================
+// DAILY BADGES
+// ======================================================
+function updateBadges(){
+  const td = today();
+  // check-in
+  const ciOk = (S.checkIn.lastDate === td && S.checkIn.claimedToday);
+  document.getElementById('ci-badge').textContent = ciOk ? '✅' : '●';
+  // combo
+  const cards = (CFG.dailyCombo && CFG.dailyCombo.cards) || [];
+  const todayCombo = (CFG.dailyCombo && CFG.dailyCombo.date === td);
+  const comboDone = todayCombo ? cards.filter(id=>(S.dailyCombo.upgraded||[]).includes(id)).length : 0;
+  const comboClaimed = (S.dailyCombo.date===td && S.dailyCombo.claimed);
+  document.getElementById('combo-badge').textContent = comboClaimed ? '✅' : `${comboDone}/3`;
+  // cipher
+  const ciphOk = (S.dailyCipher.date === td && S.dailyCipher.claimed);
+  document.getElementById('cipher-badge').textContent = ciphOk ? '✅' : '●';
+}
+
+// ======================================================
+// CHECK-IN
+// ======================================================
+function openCheckIn(){
+  const td = today();
+  // reset streak if needed
+  if(S.checkIn.lastDate !== td){
+    if(isYesterday(S.checkIn.lastDate)){
+      S.checkIn.streak = Math.min(6, (S.checkIn.streak||0) + 1);
+    } else if(S.checkIn.lastDate && S.checkIn.lastDate !== td) {
+      S.checkIn.streak = 0;
     }
+    S.checkIn.claimedToday = false;
+  }
+  const rewards = CFG.checkInRewards || DEFAULT_CFG.checkInRewards;
+  const streak = S.checkIn.streak || 0;
+  const claimed = S.checkIn.claimedToday;
+  const reward = rewards[streak] || rewards[rewards.length-1];
 
-    function renderProducts(list) {
-      const grid = document.getElementById('productGrid');
-      grid.innerHTML = '';
-      list.forEach(p => {
-        grid.innerHTML += `
-          <div class="card">
-            <div class="discount">-${Math.floor(Math.random()*20+10)}%</div>
-            <img src="${p.image}">
-            <div class="card-info">
-              <div class="p-name">${p.name}</div>
-              <div class="price-row">
-                <span class="new-price">৳${p.price}</span>
-                <span class="old-price">৳${parseInt(p.price)+150}</span>
-              </div>
-              <div class="qty-ctrl">
-                <button class="qty-btn" onclick="updateQty('${p.id}', -1)">-</button>
-                <div class="qty-num" id="q-${p.id}">1</div>
-                <button class="qty-btn" onclick="updateQty('${p.id}', 1)">+</button>
-              </div>
-              <button class="add-btn" onclick="addToCart('${p.id}')">এখনই কিনুন</button>
-            </div>
-          </div>
-        `;
-      });
+  let items = '';
+  rewards.forEach((r,i)=>{
+    const done = i < streak || (i===streak && claimed);
+    const isActive = i===streak && !claimed;
+    items += `<div class="ci-item${isActive?' active':''}${done?' claimed':''}">
+      <div class="ci-day">Day ${i+1}</div>
+      <div class="ci-ico">${done?'✅':'🪙'}</div>
+      <div class="ci-amt">${fmt(r)}</div>
+    </div>`;
+  });
+
+  showModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 ডেইলি চেক-ইন</div>
+    <p style="font-size:12px;color:var(--sub);margin-bottom:14px">প্রতিদিন চেক-ইন করে স্ট্রিক বাড়াও। মিস করলে শূন্য থেকে শুরু।</p>
+    <div class="ci-grid">${items}</div>
+    <button class="modal-ok" ${claimed?'disabled style="opacity:.4"':''} onclick="claimCI()">
+      ${claimed ? 'আজকে নেওয়া হয়েছে ✅' : `+${fmt(reward)} 🪙 নিয়ে নাও`}
+    </button>
+  `);
+}
+
+function claimCI(){
+  if(S.checkIn.claimedToday) return;
+  const rewards = CFG.checkInRewards || DEFAULT_CFG.checkInRewards;
+  const reward = rewards[S.checkIn.streak||0] || rewards[rewards.length-1];
+  S.coins += reward;
+  S.checkIn.claimedToday = true;
+  S.checkIn.lastDate = today();
+  renderHeader(); updateBadges(); saveUser(); closeModal();
+  toast(`+${fmt(reward)} 🪙 চেক-ইন বোনাস পেয়েছো! 🎉`);
+}
+
+// ======================================================
+// DAILY COMBO
+// ======================================================
+function openCombo(){
+  const td = today();
+  if(S.dailyCombo.date !== td) S.dailyCombo = {date:td, upgraded:[], claimed:false};
+  const cards = (CFG.dailyCombo && CFG.dailyCombo.date===td && CFG.dailyCombo.cards) || [];
+  if(!cards.length){
+    showModal(`<div class="modal-handle"></div><div class="modal-title">🃏 ডেইলি কম্বো</div><div class="modal-body">আজকের কম্বো এখনো সেট হয়নি। পরে আবার চেক করো।</div><button class="modal-ok2" onclick="closeModal()">বন্ধ করো</button>`);
+    return;
+  }
+  let items='';
+  cards.forEach(id=>{
+    const c = (CFG.upgrades||[]).find(x=>x.id===id);
+    const done = (S.dailyCombo.upgraded||[]).includes(id);
+    items += `<div class="combo-item${done?' done':''}">
+      <div class="combo-ico">${c?c.icon:'❓'}</div>
+      <div class="combo-name">${c?c.name:'Unknown'}</div>
+      <div class="combo-check">${done?'✅':'⬜'}</div>
+    </div>`;
+  });
+  const allDone = cards.every(id=>(S.dailyCombo.upgraded||[]).includes(id));
+  const claimed = S.dailyCombo.claimed;
+  const reward = (CFG.dailyCombo && CFG.dailyCombo.reward) || 50000;
+  showModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">🃏 ডেইলি কম্বো</div>
+    <p style="font-size:12px;color:var(--sub);margin-bottom:12px">মাইন পেজে ৩টি কার্ড আপগ্রেড করলে বোনাস পাবে।</p>
+    <div class="combo-cards">${items}</div>
+    <button class="modal-ok" onclick="claimCombo()" ${(!allDone||claimed)?'disabled style="opacity:.4"':''}>
+      ${claimed ? 'কালেক্ট করা হয়েছে ✅' : `+${fmt(reward)} 🪙 কালেক্ট করো`}
+    </button>
+  `);
+}
+
+function claimCombo(){
+  const td = today();
+  if(S.dailyCombo.claimed) return;
+  const cards = (CFG.dailyCombo&&CFG.dailyCombo.cards)||[];
+  if(!cards.every(id=>(S.dailyCombo.upgraded||[]).includes(id))) return;
+  const reward = (CFG.dailyCombo&&CFG.dailyCombo.reward)||50000;
+  S.coins += reward;
+  S.dailyCombo.claimed = true;
+  renderHeader(); updateBadges(); saveUser(); closeModal();
+  toast(`+${fmt(reward)} 🪙 কম্বো বোনাস! 🎉`);
+}
+
+// ======================================================
+// DAILY CIPHER
+// ======================================================
+function openCipher(){
+  const td = today();
+  if(S.dailyCipher.date !== td) S.dailyCipher = {date:td, claimed:false};
+  const haveCipher = CFG.dailyCipher && CFG.dailyCipher.date===td && CFG.dailyCipher.word;
+  if(!haveCipher){
+    showModal(`<div class="modal-handle"></div><div class="modal-title">🔐 ডেইলি সাইফার</div><div class="modal-body">আজকের সাইফার এখনো সেট হয়নি। পরে আবার চেক করো।</div><button class="modal-ok2" onclick="closeModal()">বন্ধ করো</button>`);
+    return;
+  }
+  if(S.dailyCipher.claimed){
+    showModal(`<div class="modal-handle"></div><div class="modal-title">🔐 ডেইলি সাইফার</div><div class="modal-body">আজকের সাইফার থেকে রিওয়ার্ড ইতিমধ্যে নিয়েছো ✅</div><button class="modal-ok2" onclick="closeModal()">বন্ধ করো</button>`);
+    return;
+  }
+  const reward = CFG.dailyCipher.reward || 25000;
+  const hint = CFG.dailyCipher.hint || 'কোনো হিন্ট নেই';
+  showModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔐 ডেইলি সাইফার</div>
+    <div class="cipher-hint">💡 হিন্ট: ${hint}</div>
+    <input class="cipher-input" id="cipher-inp" type="text" placeholder="উত্তর লিখো..." autocomplete="off" maxlength="30"/>
+    <div class="cipher-err" id="cipher-err">❌ ভুল উত্তর। আবার চেষ্টা করো।</div>
+    <button class="modal-ok" onclick="submitCipher()">+${fmt(reward)} 🪙 সাবমিট করো</button>
+  `);
+}
+
+function submitCipher(){
+  const inp = (document.getElementById('cipher-inp').value||'').trim().toUpperCase();
+  const correct = (CFG.dailyCipher.word||'').trim().toUpperCase();
+  if(inp !== correct){
+    document.getElementById('cipher-err').style.display = 'block';
+    return;
+  }
+  const reward = CFG.dailyCipher.reward || 25000;
+  S.coins += reward;
+  S.dailyCipher.claimed = true;
+  S.dailyCipher.date = today();
+  renderHeader(); updateBadges(); saveUser(); closeModal();
+  toast(`+${fmt(reward)} 🪙 সাইফার সঠিক! 🎉`);
+}
+
+// ======================================================
+// UPGRADES
+// ======================================================
+function renderCats(){
+  const el = document.getElementById('cat-scroll');
+  el.innerHTML = '';
+  (CFG.categories||[]).forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'cat-pill' + (activeCat===cat.id?' active':'');
+    btn.textContent = `${cat.icon} ${cat.name}`;
+    btn.onclick = ()=>{ activeCat=cat.id; renderCats(); renderUpgrades(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderUpgrades(){
+  const el = document.getElementById('upgrades-list');
+  el.innerHTML = '';
+  const cards = (CFG.upgrades||[]).filter(c=>c.cat===activeCat);
+  if(!cards.length){ el.innerHTML='<div class="empty"><div class="e-ico">💎</div><p>এই ক্যাটাগরিতে কার্ড নেই</p></div>'; return; }
+  cards.forEach(card=>{
+    const lv = getCardLevel(card.id);
+    const cost = getCardCost(card);
+    const canAfford = S.coins >= cost;
+    let effect = '';
+    if(card.baseProfit) effect = `+${fmt(card.baseProfit)}/ঘণ্টা প্রতি লেভেল`;
+    else if(card.energyBoost) effect = `+${card.energyBoost} ম্যাক্স এনার্জি`;
+    else if(card.tapBoost) effect = `+${card.tapBoost} ট্যাপ পাওয়ার`;
+    const div = document.createElement('div');
+    div.className = 'up-card';
+    div.innerHTML = `
+      <div class="up-ico">${card.icon||'📦'}</div>
+      <div class="up-info">
+        <div class="up-name">${card.name}</div>
+        <div class="up-meta">লেভেল ${lv}</div>
+        <div class="up-effect">${effect}</div>
+      </div>
+      <button class="buy-btn" ${canAfford?'':'disabled'}>${fmt(cost)} 🪙</button>
+    `;
+    div.querySelector('.buy-btn').onclick = ()=> buyCard(card);
+    el.appendChild(div);
+  });
+}
+
+function buyCard(card){
+  const cost = getCardCost(card);
+  if(S.coins < cost){ toast('কয়েন কম আছে!','error'); return; }
+  S.coins -= cost;
+  S.upgrades[card.id] = (S.upgrades[card.id]||0) + 1;
+  recalc();
+  // track combo
+  const td = today();
+  if(S.dailyCombo.date !== td) S.dailyCombo = {date:td, upgraded:[], claimed:false};
+  if(!(S.dailyCombo.upgraded||[]).includes(card.id)) S.dailyCombo.upgraded.push(card.id);
+  renderHeader(); renderEnergy(); renderUpgrades(); updateBadges(); checkAchievements(); saveUser();
+  toast(`${card.name} আপগ্রেড হয়েছে! লেভেল ${S.upgrades[card.id]}`);
+}
+
+// ======================================================
+// TASKS
+// ======================================================
+function renderTasks(){
+  const el = document.getElementById('tasks-list');
+  el.innerHTML = '';
+  const tasks = CFG.tasks || [];
+  if(!tasks.length){ el.innerHTML='<div class="empty"><div class="e-ico">🎯</div><p>কোনো টাস্ক নেই</p></div>'; return; }
+  tasks.forEach(task=>{
+    const done = (S.tasksCompleted||[]).includes(task.id);
+    const div = document.createElement('div');
+    div.className = 'task-card';
+    div.innerHTML = `
+      <div class="task-ico">${task.icon||'🎯'}</div>
+      <div class="task-info">
+        <div class="task-title">${task.title}</div>
+        <div class="task-reward">+${fmt(task.reward)} 🪙</div>
+      </div>
+      <button class="go-btn${done?' done':''}" ${done?'disabled':''}>${done?'সম্পন্ন ✅':'যাও'}</button>
+    `;
+    if(!done) div.querySelector('.go-btn').onclick = ()=> startTask(task);
+    el.appendChild(div);
+  });
+}
+
+function startTask(task){
+  // Open the link first
+  if(task.link){
+    if(tg&&tg.openLink) tg.openLink(task.link);
+    else window.open(task.link,'_blank');
+  }
+  showModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">${task.icon||'🎯'} ${task.title}</div>
+    <div class="modal-body">
+      কাজটি সম্পন্ন করে নিচের বাটনে ক্লিক করো।<br><br>
+      <span style="color:var(--gold);font-weight:700">+${fmt(task.reward)} 🪙</span> পাবে!
+    </div>
+    <button class="modal-ok" onclick="completeTask('${task.id}')">✅ ভেরিফাই করো</button>
+    <button class="modal-ok2" onclick="closeModal()">বাতিল</button>
+  `);
+}
+
+function completeTask(taskId){
+  const task = (CFG.tasks||[]).find(t=>t.id===taskId);
+  if(!task) return;
+  if((S.tasksCompleted||[]).includes(taskId)){ closeModal(); return; }
+  S.coins += task.reward;
+  if(!S.tasksCompleted) S.tasksCompleted = [];
+  S.tasksCompleted.push(taskId);
+  renderHeader(); renderTasks(); saveUser(); closeModal();
+  toast(`+${fmt(task.reward)} 🪙 পেয়েছো! 🎉`);
+}
+
+// ======================================================
+// LEADERBOARD
+// ======================================================
+async function renderLeaderboard(){
+  const el = document.getElementById('lb-list');
+  el.innerHTML = '<div class="shimmer"></div><div class="shimmer"></div><div class="shimmer"></div>';
+  try{
+    const snap = await db.collection('users').orderBy('coins','desc').limit(50).get();
+    el.innerHTML = '';
+    let rank = 0;
+    snap.forEach(doc=>{
+      const d = doc.data();
+      if(d.banned) return;
+      rank++;
+      const lg = getLeague(d.coins||0);
+      const isMe = doc.id === userId;
+      const div = document.createElement('div');
+      div.className = 'lb-row' + (isMe?' me':'');
+      div.innerHTML = `
+        <div class="lb-rank" style="color:${rank<=3?'var(--gold)':'var(--sub)'}">${rank<=3?['🥇','🥈','🥉'][rank-1]:rank}</div>
+        <div class="lb-info">
+          <div class="lb-name">${d.firstName||d.username||'Player'}${isMe?' (তুমি)':''}</div>
+          <div class="lb-sub" style="color:${lg.color}">${lg.icon} ${lg.name}</div>
+        </div>
+        <div class="lb-coins">${fmt(d.coins||0)} 🪙</div>
+      `;
+      el.appendChild(div);
+    });
+    if(!rank) el.innerHTML='<div class="empty"><div class="e-ico">🏆</div><p>এখনো কেউ নেই</p></div>';
+  }catch(e){
+    el.innerHTML='<div class="empty"><div class="e-ico">⚠️</div><p>লোড করতে সমস্যা হয়েছে</p></div>';
+  }
+}
+
+// ======================================================
+// FRENS / REFERRAL
+// ======================================================
+function getRefLink(){
+  const bot = (CFG&&CFG.botUsername) || BOT_USERNAME;
+  return `https://t.me/${bot}?start=ref_${userId}`;
+}
+
+function shareRef(){
+  const link = getRefLink();
+  const txt = `🐹 Hamster CEO-তে আমার সাথে জয়েন করো! ফ্রি কয়েন কামাও 👇`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(txt)}`;
+  if(tg&&tg.openTelegramLink) tg.openTelegramLink(url);
+  else window.open(url,'_blank');
+}
+
+function copyRef(){
+  const link = getRefLink();
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(link).then(()=>toast('লিংক কপি হয়েছে! ✅'));
+  } else {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    toast('লিংক কপি হয়েছে! ✅');
+  }
+}
+
+function renderFrens(){
+  const rr = (CFG&&CFG.referralReward)||10000;
+  document.getElementById('ref-reward-lbl').textContent = `+${fmt(rr)} 🪙`;
+  document.getElementById('ref-count').textContent = S.referralCount||0;
+  const el = document.getElementById('frens-list');
+  el.innerHTML = '';
+  const refs = S.referrals||[];
+  if(!refs.length){ el.innerHTML='<div class="empty"><div class="e-ico">👥</div><p>এখনো কোনো ফ্রেন্ড ইনভাইট করোনি</p></div>'; return; }
+  refs.forEach(r=>{
+    const div = document.createElement('div');
+    div.className = 'fren-row';
+    div.innerHTML = `<span class="fren-name">👤 ${r.name||'Friend'}</span><span class="fren-coins">+${fmt(rr)} 🪙</span>`;
+    el.appendChild(div);
+  });
+}
+
+// ======================================================
+// ACHIEVEMENTS
+// ======================================================
+function checkAchievements(){
+  let changed = false;
+  ACH.forEach(a=>{
+    if(a.unlocked) return;
+    const val = a.type==='coins' ? S.coins : (S[a.type]||0);
+    if(val >= a.max){
+      a.unlocked = true;
+      S.coins += a.reward;
+      changed = true;
+      showModal(`
+        <div class="modal-handle"></div>
+        <div class="modal-title">🏆 এচিভমেন্ট আনলক!</div>
+        <div style="text-align:center;font-size:50px;margin-bottom:12px">${a.icon}</div>
+        <div style="text-align:center;font-size:16px;font-weight:700;margin-bottom:6px">${a.name}</div>
+        <div style="text-align:center;font-size:22px;font-weight:900;color:var(--green);margin-bottom:18px">+${fmt(a.reward)} 🪙</div>
+        <button class="modal-ok" onclick="closeModal()">দারুণ! 🎉</button>
+      `);
     }
+  });
+  if(changed){ renderHeader(); renderAch(); saveUser(); }
+}
 
-    function startSlider() {
-      let idx = 0;
-      const imgs = document.querySelectorAll('.b-img');
-      if(imgs.length > 0) {
-        imgs[0].classList.add('active');
-        setInterval(() => {
-          imgs[idx].classList.remove('active');
-          idx = (idx + 1) % imgs.length;
-          imgs[idx].classList.add('active');
-        }, 3000);
+function renderAch(){
+  const el = document.getElementById('ach-list');
+  el.innerHTML = '';
+  ACH.forEach(a=>{
+    const val = a.type==='coins' ? S.coins : (S[a.type]||0);
+    const pct = Math.min(100, (val/a.max)*100);
+    const div = document.createElement('div');
+    div.className = 'ach-card' + (a.unlocked?' done':' locked');
+    div.innerHTML = `
+      <div class="ach-ico">${a.icon}</div>
+      <div class="ach-body">
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+        <div class="ach-prog"><div class="ach-fill" style="width:${pct}%"></div></div>
+        <div class="ach-pct">${fmt(val)} / ${fmt(a.max)}</div>
+      </div>
+      <div class="ach-right">
+        <div class="ach-reward">+${fmt(a.reward)}</div>
+        ${a.unlocked?'<div class="ach-done-ico">✅</div>':''}
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+// ======================================================
+// OFFLINE EARNINGS BANNER
+// ======================================================
+function showOfflineBanner(earned){
+  const el = document.getElementById('offline-banner');
+  el.innerHTML = `
+    <div class="offline-popup">
+      <div class="op-ico">😴</div>
+      <div class="op-txt">অফলাইনে থাকার সময় তোমার ব্যবসা আয় করেছে<br><span class="op-amt">+${fmt(earned)} 🪙</span></div>
+      <button class="op-close" onclick="this.parentNode.parentNode.innerHTML=''">✓</button>
+    </div>
+  `;
+}
+
+// ======================================================
+// BROADCAST — admin পাঠানো মেসেজ দেখাও
+// ======================================================
+async function checkBroadcast(){
+  try{
+    const snap = await db.collection('broadcasts').orderBy('createdAt','desc').limit(1).get();
+    if(snap.empty) return;
+    const last = snap.docs[0];
+    const d = last.data();
+    const seenKey = 'hc_bc_' + last.id;
+    if(localStorage.getItem(seenKey)) return;
+    localStorage.setItem(seenKey,'1');
+    showModal(`
+      <div class="modal-handle"></div>
+      <div class="modal-title">📢 ঘোষণা</div>
+      <div class="modal-body">${d.message||''}</div>
+      <button class="modal-ok" onclick="closeModal()">ঠিক আছে</button>
+    `);
+  }catch(e){}
+}
+
+// ======================================================
+// FIRESTORE: SAVE / LOAD
+// ======================================================
+function toFS(){
+  return {
+    username: S.username,
+    firstName: S.firstName,
+    photoUrl: S.photoUrl||'',
+    coins: Math.floor(S.coins),
+    energy: Math.floor(S.energy),
+    maxEnergy: S.maxEnergy,
+    profitPerHour: S.profitPerHour,
+    tapPower: S.tapPower,
+    upgrades: S.upgrades,
+    totalTaps: S.totalTaps,
+    referralCount: S.referralCount||0,
+    referredBy: S.referredBy||null,
+    referrals: S.referrals||[],
+    achievements: ACH,
+    dailyCombo: S.dailyCombo,
+    dailyCipher: S.dailyCipher,
+    checkIn: S.checkIn,
+    tasksCompleted: S.tasksCompleted||[],
+    boostsUsedToday: S.boostsUsedToday||0,
+    boostDate: S.boostDate||'',
+    banned: S.banned||false,
+    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+  };
+}
+
+let saveTimer = null;
+function saveUser(){
+  if(!db||!userId) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async()=>{
+    try{ await db.collection('users').doc(userId).set(toFS(),{merge:true}); }
+    catch(e){ console.error('Save failed',e); }
+  }, 800);
+}
+
+async function loadConfig(){
+  try{
+    const doc = await db.collection('config').doc('game').get();
+    if(doc.exists){
+      CFG = Object.assign(JSON.parse(JSON.stringify(DEFAULT_CFG)), doc.data());
+    } else {
+      CFG = JSON.parse(JSON.stringify(DEFAULT_CFG));
+      await db.collection('config').doc('game').set(CFG);
+    }
+  }catch(e){ CFG = JSON.parse(JSON.stringify(DEFAULT_CFG)); }
+}
+
+async function loadUser(){
+  const ref = db.collection('users').doc(userId);
+  try{
+    const doc = await ref.get();
+    if(doc.exists){
+      const d = doc.data();
+      Object.assign(S, d);
+      if(d.achievements) d.achievements.forEach(a=>{ const x=ACH.find(x=>x.id===a.id); if(x&&a.unlocked) x.unlocked=true; });
+      // offline earnings
+      if(d.lastUpdated && d.lastUpdated.toMillis){
+        const hrs = Math.min((Date.now()-d.lastUpdated.toMillis())/3600000, CFG.offlineEarningCapHours||3);
+        if(hrs>0.02 && S.profitPerHour>0){
+          const earned = Math.floor(S.profitPerHour * hrs);
+          if(earned>0){ S.coins+=earned; setTimeout(()=>showOfflineBanner(earned),800); }
+        }
       }
-    }
-
-    function updateQty(id, chg) {
-      let el = document.getElementById('q-'+id);
-      let val = parseInt(el.innerText) + chg;
-      if(val < 1) val = 1;
-      el.innerText = val;
-    }
-
-    function addToCart(id) {
-      const p = allProducts.find(x => x.id === id);
-      const qty = parseInt(document.getElementById('q-'+id).innerText);
-      cart.push({...p, qty});
-      document.getElementById('cartCount').innerText = cart.length;
-      showToast();
-    }
-
-    function toggleDrawer() {
-      const d = document.getElementById('orderDrawer');
-      d.classList.toggle('active');
-      if(d.classList.contains('active')) updateCartUI();
-    }
-
-    function updateCartUI() {
-      let total = 0;
-      const list = document.getElementById('cartItemsList');
-      list.innerHTML = '';
-      cart.forEach(i => {
-        total += (i.price * i.qty);
-        list.innerHTML += `<div>• ${i.name} (${i.qty} টি) - ৳${i.price * i.qty}</div>`;
-      });
-      document.getElementById('finalPrice').innerText = total - appliedDiscount;
-    }
-
-    function applyCoupon() {
-      const code = document.getElementById('couponCode').value;
-      const c = coupons.find(x => x.code === code);
-      if(c) {
-        appliedDiscount = parseInt(c.value);
-        alert('কুপন সফলভাবে কাজ করেছে!');
-        updateCartUI();
-      } else {
-        alert('ভুল কুপন কোড!');
+    } else {
+      // NEW USER
+      const sp = tg?.initDataUnsafe?.start_param || '';
+      if(sp.startsWith('ref_')){
+        const refId = sp.replace('ref_','');
+        if(refId && refId!==userId){
+          S.referredBy = refId;
+          S.coins += (CFG.referralReward||10000);
+          creditReferrer(refId);
+        }
       }
+      S.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await ref.set(toFS());
     }
+  }catch(e){ console.error('Load user failed',e); }
+}
 
-    function confirmOrder() {
-      const name = document.getElementById('oName').value;
-      const phone = document.getElementById('oPhone').value;
-      const addr = document.getElementById('oAddress').value;
-
-      if(!name || !phone || !addr) return alert('সব তথ্য পূরণ করুন!');
-
-      const orderData = {
-        customerName: name, phone: phone, district: addr,
-        total: document.getElementById('finalPrice').innerText,
-        status: "Pending", timestamp: Date.now(),
-        items: cart
-      };
-
-      db.ref('orders').push(orderData).then(() => {
-        // স্টক কমানো
-        cart.forEach(i => {
-          db.ref('products/'+i.id+'/stock').set(i.stock - i.qty);
-        });
-        alert('অর্ডারটি সফল হয়েছে!');
-        cart = []; location.reload();
+async function creditReferrer(refId){
+  try{
+    const ref = db.collection('users').doc(refId);
+    await db.runTransaction(async tx=>{
+      const snap = await tx.get(ref);
+      if(!snap.exists) return;
+      const d = snap.data();
+      const refs = d.referrals||[];
+      refs.push({id:userId, name:S.firstName||S.username, joinedAt:Date.now()});
+      tx.update(ref,{
+        coins:(d.coins||0)+(CFG.referralReward||10000),
+        referralCount:(d.referralCount||0)+1,
+        referrals:refs
       });
+    });
+  }catch(e){ console.error('Credit referrer failed',e); }
+}
+
+// ======================================================
+// GAME LOOPS
+// ======================================================
+// Energy regen
+setInterval(()=>{
+  if(S.energy < S.maxEnergy){
+    S.energy = Math.min(S.maxEnergy, S.energy + (CFG.energyRegenPerTick||3));
+    if(currentPage===0) renderEnergy();
+  }
+}, CFG?.energyRegenIntervalMs||1000);
+
+// Passive profit
+setInterval(()=>{
+  if(S.profitPerHour>0){
+    S.coins += S.profitPerHour/3600;
+    if(currentPage===0||currentPage===1) renderHeader();
+    checkAchievements();
+  }
+},1000);
+
+// Auto-save every 15s
+setInterval(saveUser, 15000);
+
+// ======================================================
+// INIT
+// ======================================================
+window.onload = async()=>{
+  try{
+    tg = window.Telegram?.WebApp;
+    if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0a0b0f'); }
+
+    const u = tg?.initDataUnsafe?.user;
+    if(u){
+      userId = u.id.toString();
+      S.username = u.username||u.first_name||'player';
+      S.firstName = u.first_name||S.username;
+      S.photoUrl = u.photo_url||'';
+    } else {
+      // browser test mode
+      userId = 'test_' + Math.floor(Math.random()*99999);
+      S.username = 'TestPlayer';
+      S.firstName = 'Test Player';
     }
 
-    function filterCat(cat, el) {
-      document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      if(cat === 'All') renderProducts(allProducts);
-      else renderProducts(allProducts.filter(p => p.category === cat));
+    firebase.initializeApp(FB_CFG);
+    db = firebase.firestore();
+
+    await loadConfig();
+    await loadUser();
+    recalc();
+
+    if(S.banned){
+      document.getElementById('ls').innerHTML=`
+        <div style="font-size:56px">🚫</div>
+        <p style="color:var(--red);font-weight:700;margin-top:16px">অ্যাকাউন্ট ব্লক করা হয়েছে</p>
+        <p style="color:var(--sub);font-size:12px;margin-top:8px">সাহায্যের জন্য সাপোর্টে যোগাযোগ করো।</p>
+      `;
+      return;
     }
 
-    function search() {
-      const q = document.getElementById('searchInp').value.toLowerCase();
-      renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q)));
-    }
+    renderHeader();
+    renderEnergy();
+    updateBadges();
+    showPage(0);
+    setTimeout(checkBroadcast, 1500);
 
-    function startSecTimer() {
-      setInterval(() => {
-        let s = document.getElementById('sec');
-        let v = parseInt(s.innerText);
-        s.innerText = v > 0 ? (v-1).toString().padStart(2, '0') : "59";
-      }, 1000);
-    }
+    document.getElementById('ls').style.display='none';
+    document.getElementById('app').style.display='block';
 
-    function showToast() {
-      const t = document.getElementById('toast');
-      t.style.display = 'block';
-      setTimeout(() => t.style.display = 'none', 2000);
-    }
+  }catch(e){
+    console.error('Init error',e);
+    document.getElementById('ls').innerHTML=`
+      <div style="font-size:56px">⚠️</div>
+      <p style="color:var(--red);font-weight:700;margin-top:16px">লোড হয়নি</p>
+      <p style="color:var(--sub);font-size:11px;margin-top:8px;padding:0 24px;text-align:center">${e.message||e}</p>
+    `;
+  }
+};
 
-    loadData();
-  </script>
+window.addEventListener('beforeunload',()=>saveUser());
+</script>
 </body>
 </html>
